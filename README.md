@@ -1,19 +1,19 @@
-# Infinite World
+# Echo Valley
 
-Infinite World is an immersive, procedurally generated 3D environment created using WebGL with Three.js. This project aims to provide a limitless, expansive world that continuously evolves as users explore it. It's designed primarily for exploration and experimentation, showcasing the power of procedural generation techniques in a 3D space. Whether you're a developer interested in how such worlds are built, or simply someone who loves endless virtual environments, Infinite World offers a beautiful sandbox to get lost in.
+Echo Valley is an immersive, procedurally generated 3D environment created using WebGL with Three.js. This project aims to provide a limitless, expansive world that continuously evolves as users explore it. It's designed primarily for exploration and experimentation, showcasing the power of procedural generation techniques in a 3D space. Whether you're a developer interested in how such worlds are built, or simply someone who loves endless virtual environments, Echo Valley offers a beautiful sandbox to get lost in.
 
-![Infinite World Screenshot](public/social/share-1200x630.png?raw=true "Infinite World Screenshot")
+![Echo Valley Screenshot](public/social/share-1200x630.png?raw=true "Echo Valley Screenshot")
 
 ## Features
 
 - **Procedural Terrain Generation**: The landscape is dynamically generated, ensuring that no two regions are the same, giving a unique experience each time you explore.
 - **Infinite Exploration**: The world extends infinitely, making every journey distinct and providing endless opportunities for discovery.
-- **WebGL and Three.js**: Built using WebGL and Three.js, Infinite World demonstrates how complex 3D environments can run efficiently in the browser.
+- **WebGL and Three.js**: Built using WebGL and Three.js, Echo Valley demonstrates how complex 3D environments can run efficiently in the browser.
 - **No Purpose, Just Fun**: The project is purely for fun and educational purposes, with no set objectives or game mechanics—just a space to explore, learn, and enjoy.
 
 ## Getting Started
 
-Follow the instructions below to set up and run Infinite World locally:
+Follow the instructions below to set up and run Echo Valley locally:
 
 ### Prerequisites
 
@@ -27,7 +27,7 @@ Make sure you have [Node.js](https://nodejs.org/en/download/) installed on your 
    ```
 2. Navigate into the project directory:
    ```
-   cd infinite-world-master
+   cd echo-valley-master
    ```
 3. Install the dependencies:
    ```
@@ -42,7 +42,7 @@ To start the development server:
 npm run dev
 ```
 
-This command will start a local server and you can access Infinite World by opening your browser and navigating to `http://localhost:3000`.
+This command will start a local server and you can access Echo Valley by opening your browser and navigating to `http://localhost:3000`.
 
 ## File Structure
 
@@ -59,7 +59,7 @@ This command will start a local server and you can access Infinite World by open
 
 ## Contributing
 
-Contributions are welcome! If you have ideas on how to improve Infinite World, feel free to submit a pull request or open an issue.
+Contributions are welcome! If you have ideas on how to improve Echo Valley, feel free to submit a pull request or open an issue.
 
 ## License
 
