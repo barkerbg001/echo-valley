@@ -24,6 +24,12 @@ export default class Player
         this.position.delta = vec3.create()
 
         this.camera = new Camera(this)
+
+        // Initialize jump-related properties
+        this.isJumping = false
+        this.jumpVelocity = 0
+        this.gravity = -9.8
+        this.jumpStrength = 5
     }
 
     update()
@@ -66,6 +72,25 @@ export default class Player
             this.position.current[2] -= z
         }
 
+        // Handle jump input
+        if (this.controls.keys.down.jump && !this.isJumping) {
+            this.isJumping = true
+            this.jumpVelocity = this.jumpStrength
+        }
+
+        // Update vertical position based on jump state
+        if (this.isJumping) {
+            this.position.current[1] += this.jumpVelocity * this.time.delta
+            this.jumpVelocity += this.gravity * this.time.delta
+
+            // Check if the player has landed (assuming ground level is y = 0)
+            if (this.position.current[1] <= 0) {
+                this.position.current[1] = 0
+                this.isJumping = false
+                this.jumpVelocity = 0
+            }
+        }
+
         vec3.sub(this.position.delta, this.position.current, this.position.previous)
         vec3.copy(this.position.previous, this.position.current)
 
@@ -78,9 +103,9 @@ export default class Player
         const chunks = this.state.chunks
         const elevation = chunks.getElevationForPosition(this.position.current[0], this.position.current[2])
 
-        if(elevation)
+        if(elevation && !this.isJumping)
             this.position.current[1] = elevation
-        else
+        else if (!elevation && !this.isJumping)
             this.position.current[1] = 0
     }
 }
