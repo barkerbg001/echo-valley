@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 import Game from '@/Game.js'
 import View from '@/View/View.js'
@@ -6,10 +7,8 @@ import Debug from '@/Debug/Debug.js'
 import State from '@/State/State.js'
 import PlayerMaterial from './Materials/PlayerMaterial.js'
 
-export default class Player
-{
-    constructor()
-    {
+export default class Player {
+    constructor() {
         this.game = Game.getInstance()
         this.state = State.getInstance()
         this.view = View.getInstance()
@@ -18,55 +17,47 @@ export default class Player
         this.scene = this.view.scene
 
         this.setGroup()
-        this.setHelper()
+        this.setModel()  // Updated to load the model instead of a helper geometry
         this.setDebug()
     }
 
-    setGroup()
-    {
+    setGroup() {
         this.group = new THREE.Group()
         this.scene.add(this.group)
     }
-    
-    setHelper()
-    {
-        this.helper = new THREE.Mesh()
-        this.helper.material = new PlayerMaterial()
-        this.helper.material.uniforms.uColor.value = new THREE.Color('#fa0202')
-        this.helper.material.uniforms.uSunPosition.value = new THREE.Vector3(- 0.5, - 0.5, - 0.5)
 
-        this.helper.geometry = new THREE.CapsuleGeometry(0.5, 0.8, 3, 16),
-        this.helper.geometry.translate(0, 0.9, 0)
-        this.group.add(this.helper)
+    setModel() {
+        const loader = new GLTFLoader()
 
-        // const arrow = new THREE.Mesh(
-        //     new THREE.ConeGeometry(0.2, 0.2, 4),
-        //     new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: false })
-        // )
-        // arrow.rotation.x = - Math.PI * 0.5
-        // arrow.position.y = 1.5
-        // arrow.position.z = - 0.5
-        // this.helper.add(arrow)
-        
-        // // Axis helper
-        // this.axisHelper = new THREE.AxesHelper(3)
-        // this.group.add(this.axisHelper)
+        loader.load(
+            '/player/character-male-a.glb', // Path to your GLB file
+            (gltf) => {
+                this.model = gltf.scene
+                this.model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = new PlayerMaterial()  // Apply your custom material
+                        child.material.uniforms.uColor.value = new THREE.Color('#fa0202')
+                        child.material.uniforms.uSunPosition.value = new THREE.Vector3(-0.5, -0.5, -0.5)
+                    }
+                })
+
+                this.group.add(this.model)
+            },
+            undefined,
+            (error) => {
+                console.error('An error occurred loading the model:', error)
+            }
+        )
     }
 
-    setDebug()
-    {
-        if(!this.debug.active)
-            return
+    setDebug() {
+        if (!this.debug.active) return
 
-        // Sphere
         const playerFolder = this.debug.ui.getFolder('view/player')
-
-        playerFolder.addColor(this.helper.material.uniforms.uColor, 'value')
+        playerFolder.addColor(this.helper?.material.uniforms.uColor, 'value')
     }
 
-
-    update()
-    {
+    update() {
         const playerState = this.state.player
         const sunState = this.state.sun
 
@@ -76,8 +67,13 @@ export default class Player
             playerState.position.current[2]
         )
         
-        // Helper
-        this.helper.rotation.y = playerState.rotation
-        this.helper.material.uniforms.uSunPosition.value.set(sunState.position.x, sunState.position.y, sunState.position.z)
+        if (this.model) {
+            this.model.rotation.y = playerState.rotation
+            this.model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.uniforms.uSunPosition.value.set(sunState.position.x, sunState.position.y, sunState.position.z)
+                }
+            })
+        }
     }
 }
