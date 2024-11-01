@@ -5,7 +5,6 @@ import Game from '@/Game.js'
 import View from '@/View/View.js'
 import Debug from '@/Debug/Debug.js'
 import State from '@/State/State.js'
-import PlayerMaterial from './Materials/PlayerMaterial.js'
 
 export default class Player {
     constructor() {
@@ -15,9 +14,13 @@ export default class Player {
         this.debug = Debug.getInstance()
 
         this.scene = this.view.scene
+        this.clock = new THREE.Clock() // To track delta time for animations
 
         this.setGroup()
-        this.setModel()  // Updated to load the model instead of a helper geometry
+        this.addLights()
+        this.loadTexture(() => {
+            this.setModel()
+        })
         this.setDebug()
     }
 
@@ -26,18 +29,55 @@ export default class Player {
         this.scene.add(this.group)
     }
 
+    addLights() {
+        // Ambient light for general illumination
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5) 
+        this.scene.add(ambientLight)
+
+        // Directional light to simulate sunlight
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+        directionalLight.position.set(5, 5, 5)
+        this.scene.add(directionalLight)
+    }
+
+    loadTexture(callback) {
+        const textureLoader = new THREE.TextureLoader()
+        this.colorMap = textureLoader.load(
+            '/player/Textures/colormap.png',
+            () => {
+                console.log("Texture loaded successfully")
+                if (callback) callback()
+            },
+            undefined,
+            (error) => console.error("Texture loading error:", error)
+        )
+    }
+
     setModel() {
         const loader = new GLTFLoader()
 
         loader.load(
-            '/player/character-male-a.glb', // Path to your GLB file
+            '/player/vehicle-racer-low.glb',
             (gltf) => {
                 this.model = gltf.scene
+
+                // Scale the model to make it more visible
+                this.model.scale.set(5, 5, 5)
+
+                // Set up animations if any are present in the GLB file
+                if (gltf.animations && gltf.animations.length) {
+                    this.mixer = new THREE.AnimationMixer(this.model)
+                    const action = this.mixer.clipAction(gltf.animations[0]) // Play the first animation
+                    action.play()
+                }
+
+                // Apply texture and set up material for each mesh
                 this.model.traverse((child) => {
                     if (child.isMesh) {
-                        child.material = new PlayerMaterial()  // Apply your custom material
-                        child.material.uniforms.uColor.value = new THREE.Color('#fa0202')
-                        child.material.uniforms.uSunPosition.value = new THREE.Vector3(-0.5, -0.5, -0.5)
+                        child.material = new THREE.MeshStandardMaterial({
+                            map: this.colorMap,   // Apply loaded color texture
+                        })
+                        console.log("Texture applied to mesh:", child)
                     }
                 })
 
@@ -54,10 +94,12 @@ export default class Player {
         if (!this.debug.active) return
 
         const playerFolder = this.debug.ui.getFolder('view/player')
-        playerFolder.addColor(this.helper?.material.uniforms.uColor, 'value')
+        if (this.helper?.material) {
+            playerFolder.addColor(this.helper.material.uniforms.uColor, 'value')
+        }
     }
 
-    update() {
+    update(deltaTime) {  // Accept deltaTime as an argument to control animation speed
         const playerState = this.state.player
         const sunState = this.state.sun
 
@@ -69,11 +111,11 @@ export default class Player {
         
         if (this.model) {
             this.model.rotation.y = playerState.rotation
-            this.model.traverse((child) => {
-                if (child.isMesh) {
-                    child.material.uniforms.uSunPosition.value.set(sunState.position.x, sunState.position.y, sunState.position.z)
-                }
-            })
+        }
+
+        // Update the animation mixer if it exists
+        if (this.mixer) {
+            this.mixer.update(deltaTime)
         }
     }
 }
